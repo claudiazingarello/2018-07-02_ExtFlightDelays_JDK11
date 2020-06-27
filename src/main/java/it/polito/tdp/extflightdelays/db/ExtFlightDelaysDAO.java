@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import it.polito.tdp.extflightdelays.model.Adiacenza;
 import it.polito.tdp.extflightdelays.model.Airline;
 import it.polito.tdp.extflightdelays.model.Airport;
 import it.polito.tdp.extflightdelays.model.Flight;
@@ -80,6 +82,41 @@ public class ExtFlightDelaysDAO {
 						rs.getDouble("ELAPSED_TIME"), rs.getInt("DISTANCE"),
 						rs.getTimestamp("ARRIVAL_DATE").toLocalDateTime(), rs.getDouble("ARRIVAL_DELAY"));
 				result.add(flight);
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
+	
+	
+	public List<Adiacenza> getAdiacenze(int distanza, Map<Integer, Airport> airportIdMap) {
+		String sql = "SELECT f.ORIGIN_AIRPORT_ID AS id1, f.DESTINATION_AIRPORT_ID AS id2, AVG(f.DISTANCE) AS peso " + 
+				"FROM flights AS f " + 
+				"WHERE f.ORIGIN_AIRPORT_ID <> f.DESTINATION_AIRPORT_ID " + 
+				"GROUP BY id1, id2 " + 
+				"HAVING peso > ? ";
+		List<Adiacenza> result = new LinkedList<Adiacenza>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, distanza);
+			
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				Integer id1 = res.getInt("id1");
+				Integer id2 = res.getInt("id2");
+				
+				if(airportIdMap.containsKey(id1) && airportIdMap.containsKey(id2)) {
+					result.add(new Adiacenza(airportIdMap.get(id1), airportIdMap.get(id2), res.getDouble("peso")));
+				}
 			}
 
 			conn.close();
