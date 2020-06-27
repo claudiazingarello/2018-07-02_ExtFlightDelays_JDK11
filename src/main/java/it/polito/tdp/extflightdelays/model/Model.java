@@ -13,12 +13,17 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 import it.polito.tdp.extflightdelays.db.ExtFlightDelaysDAO;
 
+
 public class Model {
 
 	private ExtFlightDelaysDAO dao ;
 	private Graph<Airport, DefaultWeightedEdge> grafo;
 	private List<Airport> aeroporti;
 	private Map<Integer, Airport> airportIdMap;
+	
+	//variabili ricorsione
+	private List<Airport> percorsoBest;
+	private Double migliaBest;
 
 	public Model() {
 		dao = new ExtFlightDelaysDAO();
@@ -69,5 +74,72 @@ public class Model {
 		}
 		Collections.sort(vicini);
 		return vicini;
+	}
+	
+	public List<Airport> cercaItinerario(Double migliaDisponibili, Airport airport){
+		//inizializza le variabili
+		percorsoBest = new ArrayList<Airport>();
+		migliaBest = 0.0;
+		
+		//imposta parziale, con vertice da cui partire 
+		List<Airport> parziale = new ArrayList<Airport>();
+		parziale.add(airport);
+		
+		cerca(parziale, migliaDisponibili, 1); //partiamo dalla posizione 1 di parziale perchè alla posizione 0 c'è aeroporto
+		
+		return percorsoBest;
+	}
+
+	/*
+	 * RICORSIONE
+	 * 
+	 * Soluzione parziale: Lista di Airport(lista di vertici)
+	 * Livello ricorsione: lunghezza della lista
+	 * casi terminali: non trova altri vertici da aggiungere -> verifica se il cammino ha lunghezza max
+	 * 					tra quelli visti fino ad ora
+	 * Generazione delle soluzioni: vertici connessi all'ultimo vertice del percorso
+	 * 								non ancora parte del percorso,
+	 * 								relativi ad archi con peso uguale alle migliaDisponibili
+	 */
+	
+	private void cerca(List<Airport> parziale, Double migliaDisponibili, Integer livello) {
+		Airport ultimo = parziale.get(parziale.size()-1);
+		
+		//Caso TERMINALE
+		//il livello indica il numero di città attraversate
+		//se è maggiore della dimensione del percorsoBest allora 
+		//abbiamo trovato un percorso più lungo
+		if(livello > this.percorsoBest.size()) {
+			this.percorsoBest = new ArrayList<Airport>(parziale);
+			this.migliaBest = migliaDisponibili;
+		}
+		
+		//aggiorniamo la soluzione anche se il numero di città è lo stesso
+		//ma abbiamo percorso più miglia
+		if(livello == this.percorsoBest.size() && migliaDisponibili > migliaBest) {
+			this.percorsoBest = new ArrayList<Airport>(parziale);
+			this.migliaBest = migliaDisponibili;
+		}
+		
+		
+		//Casi INTERMEDI
+		List<Airport> vicini = Graphs.neighborListOf(grafo, ultimo);
+		for (Airport prossimo : vicini) {
+			Double peso = this.grafo.getEdgeWeight(grafo.getEdge(ultimo, prossimo));
+			if(!parziale.contains(prossimo) && migliaDisponibili >= peso) {
+				
+				parziale.add(prossimo);
+				migliaDisponibili -= peso;
+				cerca(parziale, migliaDisponibili, livello+1);
+				
+				//backtracking
+				parziale.remove(parziale.size()-1);
+				migliaDisponibili += peso;
+			}
+		}
+	}
+	
+	public Double getMigliaBest() {
+		return migliaBest;
 	}
 }

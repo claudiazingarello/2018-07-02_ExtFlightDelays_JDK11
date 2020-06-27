@@ -63,6 +63,9 @@ public class FXMLController {
 		btnAeroportiConnessi.setDisable(false);
 		cmbBoxAeroportoPartenza.getItems().addAll(model.getAirportGrafo());
 		
+		btnCercaItinerario.setDisable(false);
+		numeroVoliTxtInput.setDisable(false);
+		
 	}
 
 	@FXML
@@ -87,6 +90,32 @@ public class FXMLController {
 	@FXML
 	void doCercaItinerario(ActionEvent event) {
 		txtResult.clear();
+		
+		if(cmbBoxAeroportoPartenza.isDisable()) {
+			txtResult.appendText("ERRORE: crea prima il grafo!");
+			return;
+		}
+		
+		Airport airport = cmbBoxAeroportoPartenza.getValue();
+		if(airport == null) {
+			txtResult.appendText("ERRORE: devi selezionare un aereoporto");
+			return;
+		}
+		
+		Double migliaDisponibili;
+		try {
+			migliaDisponibili = Double.parseDouble(numeroVoliTxtInput.getText());
+		} catch(NumberFormatException e) {
+			txtResult.appendText("ERRORE: inserire un valore numerico!");
+			return;
+		}
+		
+		List<Airport> itinerario = model.cercaItinerario(migliaDisponibili, airport);
+
+		for(Airport a : itinerario) {
+			txtResult.appendText(a.getAirportName() + "\n");
+		}
+		txtResult.appendText("\nDISTANZA TOTALE PERCORSA "+model.getMigliaBest());
 	}
 
 	@FXML
@@ -106,6 +135,9 @@ public class FXMLController {
 		
 		cmbBoxAeroportoPartenza.setDisable(true);
 		btnAeroportiConnessi.setDisable(true);
+		
+		btnCercaItinerario.setDisable(true);
+		numeroVoliTxtInput.setDisable(true);
 		
 	}
 }
