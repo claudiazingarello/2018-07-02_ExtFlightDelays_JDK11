@@ -1,6 +1,6 @@
 package it.polito.tdp.extflightdelays.model;
 
-public class Adiacenza {
+public class Adiacenza implements Comparable<Adiacenza>{
 
 	private Airport a1;
 	private Airport a2;
@@ -28,6 +28,11 @@ public class Adiacenza {
 	}
 	public void setPeso(Double peso) {
 		this.peso = peso;
+	}
+	@Override
+	public int compareTo(Adiacenza o) {
+		//Ordine decrescente di peso
+		return -(this.peso.compareTo(o.getPeso()));
 	}
 	
 	

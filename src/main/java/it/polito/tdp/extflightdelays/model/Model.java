@@ -1,5 +1,7 @@
 package it.polito.tdp.extflightdelays.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +27,11 @@ public class Model {
 	public void creaGrafo(int distanza) {
 		grafo = new SimpleWeightedGraph<Airport, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
-		//Aggiungi i vertici
-		aeroporti = dao.loadAllAirports();
+		//Aggiungi i vertici --> NO
 		
-
 		//Imposta idMap
 		airportIdMap = new HashMap<Integer, Airport>();
-		for(Airport a : aeroporti) {
+		for(Airport a : dao.loadAllAirports()) {
 			if(!airportIdMap.containsKey(a.getId()))
 				airportIdMap.put(a.getId(), a);
 		}
@@ -50,5 +50,24 @@ public class Model {
 		}
 
 		System.out.println("Grafo creato!\n#vertici: "+grafo.vertexSet().size()+"\n#archi: "+grafo.edgeSet().size()+"\n");
+		
+		//Salviamo i vertici del grafo in una lista
+		aeroporti = new ArrayList<Airport>(grafo.vertexSet());
+	}
+	
+	public List<Airport> getAirportGrafo(){
+		return aeroporti;
+	}
+
+	public List<Vicino> getAirportAdiacenti(Airport airport) {
+		List<Vicino> vicini = new ArrayList<Vicino>();
+		
+		List<Airport> listaAeroportiVicini = Graphs.neighborListOf(grafo, airport);
+		for(Airport a : listaAeroportiVicini) {
+			Double peso = grafo.getEdgeWeight(grafo.getEdge(airport, a));
+			vicini.add(new Vicino(a, peso));
+		}
+		Collections.sort(vicini);
+		return vicini;
 	}
 }

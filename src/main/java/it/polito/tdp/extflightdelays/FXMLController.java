@@ -1,9 +1,12 @@
 package it.polito.tdp.extflightdelays;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.extflightdelays.model.Airport;
 import it.polito.tdp.extflightdelays.model.Model;
+import it.polito.tdp.extflightdelays.model.Vicino;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -33,7 +36,7 @@ public class FXMLController {
 	private Button btnAnalizza;
 
 	@FXML
-	private ComboBox<?> cmbBoxAeroportoPartenza;
+	private ComboBox<Airport> cmbBoxAeroportoPartenza;
 
 	@FXML
 	private Button btnAeroportiConnessi;
@@ -56,12 +59,29 @@ public class FXMLController {
 		}
 		
 		model.creaGrafo(distanza);
+		cmbBoxAeroportoPartenza.setDisable(false);
+		btnAeroportiConnessi.setDisable(false);
+		cmbBoxAeroportoPartenza.getItems().addAll(model.getAirportGrafo());
 		
 	}
 
 	@FXML
 	void doCalcolaAeroportiConnessi(ActionEvent event) {
 		txtResult.clear();
+		if(cmbBoxAeroportoPartenza.isDisable()) {
+			txtResult.appendText("ERRORE: crea prima il grafo!");
+			return;
+		}
+		Airport airport = cmbBoxAeroportoPartenza.getValue();
+		if(airport == null) {
+			txtResult.appendText("ERRORE: devi selezionare un aereoporto");
+			return;
+		}
+		
+		List<Vicino> listaAdiacenti = model.getAirportAdiacenti(airport);
+		for(Vicino v : listaAdiacenti) {
+			txtResult.appendText(v.toString()+"\n");
+		}
 	}
 
 	@FXML
@@ -83,5 +103,9 @@ public class FXMLController {
 
 	public void setModel(Model model) {
 		this.model = model;
+		
+		cmbBoxAeroportoPartenza.setDisable(true);
+		btnAeroportiConnessi.setDisable(true);
+		
 	}
 }
