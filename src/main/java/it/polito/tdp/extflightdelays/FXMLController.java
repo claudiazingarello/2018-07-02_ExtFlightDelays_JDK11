@@ -1,8 +1,11 @@
 package it.polito.tdp.extflightdelays;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.extflightdelays.model.Airport;
+import it.polito.tdp.extflightdelays.model.AirportDuration;
 import it.polito.tdp.extflightdelays.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -33,7 +36,7 @@ public class FXMLController {
     private Button btnAnalizza;
 
     @FXML
-    private ComboBox<?> cmbBoxAeroportoPartenza;
+    private ComboBox<Airport> cmbBoxAeroportoPartenza;
 
     @FXML
     private Button btnAeroportiConnessi;
@@ -46,17 +49,43 @@ public class FXMLController {
 
     @FXML
     void doAnalizzaAeroporti(ActionEvent event) {
-
+    	txtResult.clear();
+    	
+    	int x;
+    	
+    	try {
+    		x = Integer.parseInt(voliMinimo.getText());
+    	} catch (NumberFormatException e) {
+    		txtResult.appendText("ERRORE: inserire valore nel formato numerico");
+    		return;
+    	}
+    	
+    	model.creaGrafo(x);
+    	cmbBoxAeroportoPartenza.getItems().clear();
+    	cmbBoxAeroportoPartenza.getItems().addAll(model.getAereoportiGrafo());
     }
 
     @FXML
     void doCalcolaAeroportiConnessi(ActionEvent event) {
-
+    	txtResult.clear();
+    	if(cmbBoxAeroportoPartenza.getItems().isEmpty()) {
+    		txtResult.appendText("ERRORE: devi creare il grafo!");
+    		return;
+    	}
+    	Airport airport = cmbBoxAeroportoPartenza.getValue();
+    	if(airport == null) {
+    		txtResult.appendText("ERRORE: seleziona un aereoporto");
+    	}
+    	
+    	List<AirportDuration> listaConnessi = model.getAirportConnected(airport);
+    	for(AirportDuration a : listaConnessi) {
+    		txtResult.appendText(a.getA().getId()+" "+a.getA().getAirportName()+"\n");
+    	}
     }
 
     @FXML
     void doCercaItinerario(ActionEvent event) {
-
+    	txtResult.clear();
     }
 
     @FXML
