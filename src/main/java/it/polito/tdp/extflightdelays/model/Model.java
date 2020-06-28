@@ -35,6 +35,7 @@ public class Model {
 				airportIdMap.put(a.getId(), a);
 			}
 		}
+		
 
 		//Aggiungi i vertici e gli archi
 		for (Adiacenza a : dao.getAdiacenze(x, airportIdMap)) {
