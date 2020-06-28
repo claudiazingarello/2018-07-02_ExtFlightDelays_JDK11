@@ -17,7 +17,6 @@ public class Model {
 	private ExtFlightDelaysDAO dao;
 	private Map<Integer, Airport> airportIdMap;
 	private Graph<Airport, DefaultWeightedEdge> grafo;
-
 	private List<Airport> aereoportiGrafo;
 	private List<Airport> percorsoBest;
 	private Double pesoBest;
