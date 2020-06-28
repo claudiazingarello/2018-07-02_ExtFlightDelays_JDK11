@@ -123,5 +123,9 @@ public class Airport {
 	public String toString() {
 		return "Airport [id=" + id + ", iataCode=" + iataCode + ", airportName=" + airportName + "]";
 	}
+
+	public int compareTo(Airport airport) {
+		return this.airportName.compareTo(airport.getAirportName());
+	}
 	
 }
